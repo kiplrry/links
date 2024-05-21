@@ -2,6 +2,8 @@
 
 from models import User, Link
 
-newone: User = User.get(7)
-link:list[Link]=  newone.links
-print(link[0].user)
+ud = User(name='liry', username='ddsi', age=21)
+ud.save()
+us = User.get(1)
+
+print(us)

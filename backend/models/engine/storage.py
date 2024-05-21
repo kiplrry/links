@@ -9,9 +9,11 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 
 
 config = dotenv_values('.env')
+
+
 class Storage():
     """The Storage Class"""
-    
+
     __engine = None
     __session = None
 
@@ -23,29 +25,29 @@ class Storage():
         DB = config['DB']
         try:
             self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.
-                                        format(USER, PASS, HOST, DB)
-                                        )
+                                          format(USER, PASS, HOST, DB))
         except OperationalError as err:
             print(f'err occured {err}')
-    
+
     def save(self, obj) -> int:
         """Saves the obj to storage"""
         try:
             self.__session.commit()
             return obj.id
         except IntegrityError as err:
+            print(err)
             print(f'{obj.__class__.__name__} not created, duplicate')
             return None
 
     def new(self, obj):
         """Saves obj to session"""
         self.__session.add(obj)
-    
-    def all(self, cls, offset: int =0, limit: int =100):
+
+    def all(self, cls, offset: int = 0, limit: int = 100):
         """query on the current database session"""
         vals = self.__session.query(cls).offset(offset).limit(limit).all()
         return vals
-    
+
     def reload(self):
         """reloads the session"""
         Base.metadata.create_all(bind=self.__engine)
@@ -55,11 +57,11 @@ class Storage():
         scoped = scoped_session(sess)
         self.__session = scoped
 
-
     def delete(self, obj):
         """deletes the obj in storage"""
         if obj:
             self.__session.delete(obj)
+            self.__session.commit()
 
     def get(self, cls, id):
         """gets an object"""
@@ -76,7 +78,7 @@ class Storage():
         """Count obj in DB"""
         count = self.__session.query(cls).count()
         return count
-    
+
     def query(self, cls):
         """Return query"""
         return self.__session.query(cls)
